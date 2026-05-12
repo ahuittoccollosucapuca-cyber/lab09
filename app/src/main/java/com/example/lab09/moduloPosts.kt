@@ -11,14 +11,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScreenPosts(navController: NavHostController, servicio: PostApiService) {
-
     val listaPosts = remember { mutableStateListOf<PostModel>() }
 
     LaunchedEffect(Unit) {
@@ -26,43 +25,46 @@ fun ScreenPosts(navController: NavHostController, servicio: PostApiService) {
             val listado = servicio.getUserPosts()
             listaPosts.clear()
             listaPosts.addAll(listado)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        } catch (e: Exception) { e.printStackTrace() }
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text(
-            text = "Publicaciones API",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Encabezado Azul de la Imagen
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = Color(0xFF586BA4)
+        ) {
+            Text(
+                text = "JSONPlaceHolder Access",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                modifier = Modifier.padding(16.dp),
+                textAlign = TextAlign.Center
+            )
+        }
 
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(listaPosts) { item ->
-                Card(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
+                    Text(
+                        text = "${item.id} ${item.title}",
+                        modifier = Modifier.weight(0.85f),
+                        fontSize = 16.sp
+                    )
+                    IconButton(
+                        onClick = { navController.navigate("postsVer/${item.id}") },
+                        modifier = Modifier.weight(0.15f)
                     ) {
-                        Text(text = item.id.toString(), modifier = Modifier.weight(0.1f))
-                        Text(text = item.title, modifier = Modifier.weight(0.7f), maxLines = 1)
-                        IconButton(
-                            onClick = { navController.navigate("postsVer/${item.id}") },
-                            modifier = Modifier.weight(0.2f)
-                        ) {
-                            Icon(imageVector = Icons.Outlined.Search, contentDescription = null)
-                        }
+                        Icon(imageVector = Icons.Outlined.Search, contentDescription = null)
                     }
                 }
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Color.LightGray)
             }
         }
     }
@@ -75,28 +77,46 @@ fun ScreenPost(navController: NavHostController, servicio: PostApiService, id: I
     LaunchedEffect(id) {
         try {
             post = servicio.getUserPostById(id)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        } catch (e: Exception) { e.printStackTrace() }
     }
 
-    Column(
-        modifier = Modifier
-            .padding(24.dp)
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        post?.let {
-            Text(text = "DETALLE", fontSize = 12.sp, color = Color.Gray)
-            Text(text = it.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
-            Text(text = it.body, style = MaterialTheme.typography.bodyLarge)
-            Spacer(modifier = Modifier.weight(1f))
-            Button(onClick = { navController.popBackStack() }, modifier = Modifier.fillMaxWidth()) {
-                Text("Regresar")
+    Column(modifier = Modifier.fillMaxSize()) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = Color(0xFF586BA4)
+        ) {
+            Text(
+                text = "JSONPlaceHolder Access",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                modifier = Modifier.padding(16.dp),
+                textAlign = TextAlign.Center
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            post?.let {
+                OutlinedTextField(value = it.id.toString(), onValueChange = {}, label = { Text("id") }, modifier = Modifier.fillMaxWidth(), readOnly = true)
+                OutlinedTextField(value = it.userId.toString(), onValueChange = {}, label = { Text("userId") }, modifier = Modifier.fillMaxWidth(), readOnly = true)
+                OutlinedTextField(value = it.title, onValueChange = {}, label = { Text("title") }, modifier = Modifier.fillMaxWidth(), readOnly = true)
+                OutlinedTextField(value = it.body, onValueChange = {}, label = { Text("body") }, modifier = Modifier.fillMaxWidth(), readOnly = true)
+
+                Button(
+                    onClick = { navController.popBackStack() },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF586BA4))
+                ) {
+                    Text("REGRESAR")
+                }
+            } ?: Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
-        } ?: Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
         }
     }
 }

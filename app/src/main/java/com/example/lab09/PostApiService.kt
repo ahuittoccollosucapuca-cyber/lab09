@@ -8,7 +8,5 @@ interface PostApiService {
     suspend fun getUserPosts(): List<PostModel>
 
     @GET("posts/{id}")
-    suspend fun getUserPostById(
-        @Path("id") id: Int
-    ): PostModel
+    suspend fun getUserPostById(@Path("id") id: Int): PostModel
 }

@@ -33,8 +33,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ProgPrincipal9() {
-    // 1. Configuración de Retrofit
-    val urlBase = "https://jsonplaceholder.typicode.com/" // Cambié a Typicode por ser más estable para pruebas
+    val urlBase = "https://jsonplaceholder.typicode.com/"
     val retrofit = Retrofit.Builder()
         .baseUrl(urlBase)
         .addConverterFactory(GsonConverterFactory.create())
@@ -49,23 +48,15 @@ fun ProgPrincipal9() {
 }
 
 @Composable
-fun Contenido(
-    paddingValues: PaddingValues,
-    navController: NavHostController,
-    servicio: PostApiService
-) {
+fun Contenido(pv: PaddingValues, navController: NavHostController, servicio: PostApiService) {
     NavHost(
         navController = navController,
         startDestination = "posts",
-        modifier = Modifier.padding(paddingValues)
+        modifier = Modifier.padding(pv)
     ) {
-        composable("posts") {
-            ScreenPosts(navController, servicio)
-        }
-
-        // Definición más explícita del argumento id
+        composable("posts") { ScreenPosts(navController, servicio) }
         composable(
-            route = "postsVer/{id}",
+            "postsVer/{id}",
             arguments = listOf(navArgument("id") { type = NavType.IntType })
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getInt("id") ?: 0
