@@ -4,14 +4,20 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.lab09.ui.theme.Lab09Theme
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,29 +25,51 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Lab09Theme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                ProgPrincipal9()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun ProgPrincipal9() {
+    // 1. Configuración de Retrofit
+    val urlBase = "https://jsonplaceholder.typicode.com/" // Cambié a Typicode por ser más estable para pruebas
+    val retrofit = Retrofit.Builder()
+        .baseUrl(urlBase)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val servicio = retrofit.create(PostApiService::class.java)
+    val navController = rememberNavController()
+
+    Scaffold { innerPadding ->
+        Contenido(innerPadding, navController, servicio)
+    }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    Lab09Theme {
-        Greeting("Android")
+fun Contenido(
+    paddingValues: PaddingValues,
+    navController: NavHostController,
+    servicio: PostApiService
+) {
+    NavHost(
+        navController = navController,
+        startDestination = "posts",
+        modifier = Modifier.padding(paddingValues)
+    ) {
+        composable("posts") {
+            ScreenPosts(navController, servicio)
+        }
+
+        // Definición más explícita del argumento id
+        composable(
+            route = "postsVer/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getInt("id") ?: 0
+            ScreenPost(navController, servicio, id)
+        }
     }
 }
